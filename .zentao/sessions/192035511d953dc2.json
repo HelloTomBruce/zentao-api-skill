@@ -1,0 +1,14 @@
+{
+  "endpoint": "http://127.0.0.1:8080",
+  "username": "admin",
+  "sid": "isgrcdnpbq7np8jat7stmqitg3",
+  "cookies": {
+    "device": "desktop",
+    "keepLogin": "on",
+    "lang": "zh-cn",
+    "theme": "default",
+    "za": "admin",
+    "zentaosid": "isgrcdnpbq7np8jat7stmqitg3",
+    "zp": "cb5fe5d2899b55f8f4da20c5550145fba96da3e4"
+  }
+}

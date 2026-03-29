@@ -1,0 +1,3 @@
+.ruff_cache
+lib/__pycache__
+.DS_Store
