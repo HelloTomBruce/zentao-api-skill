@@ -2451,6 +2451,1068 @@ class ZenTaoClient:
         """
         return self.old_request("GET", f"/testreport-delete-{report_id}-yes.json")
 
+    # ==================== 任务模块补充方法 ====================
+
+    def edit_task(self, task_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑任务（老 API）
+
+        Args:
+            task_id: 任务ID
+            **kwargs: 要修改的字段 (name, type, pri, estimate, left, assignedTo, status, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_task("10", name="新任务名", pri="2")
+        """
+        return self.old_request("POST", f"/task-edit-{task_id}.json", kwargs)
+
+    def move_task(self, task_id: str, project_id: str) -> Tuple[bool, Dict]:
+        """移动任务到其他项目（老 API）
+
+        Args:
+            task_id: 任务ID
+            project_id: 目标项目ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.move_task("10", "2")
+        """
+        return self.old_request("POST", f"/task-move-{task_id}-{project_id}.json")
+
+    def copy_task(self, task_id: str, project_id: str = None) -> Tuple[bool, Dict]:
+        """复制任务（老 API）
+
+        Args:
+            task_id: 任务ID
+            project_id: 目标项目ID（可选，不传则复制到当前项目）
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.copy_task("10", "2")
+        """
+        if project_id:
+            return self.old_request("POST", f"/task-copy-{task_id}-{project_id}.json")
+        return self.old_request("POST", f"/task-copy-{task_id}.json")
+
+    def get_task_subtasks(self, task_id: str) -> Tuple[bool, List[Dict]]:
+        """获取任务的子任务列表（老 API）
+
+        Args:
+            task_id: 任务ID
+
+        Returns:
+            (success, subtasks) 子任务列表
+
+        Example:
+            >>> success, subtasks = client.get_task_subtasks("10")
+            >>> for task in subtasks:
+            ...     print(f"[{task['id']}] {task['name']}")
+        """
+        success, result = self.old_request("GET", f"/task-viewSubtasks-{task_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("children", [])
+        return False, []
+
+    def link_task_story(self, task_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """任务关联需求（老 API）
+
+        Args:
+            task_id: 任务ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_task_story("10", "5")
+        """
+        return self.old_request("POST", f"/task-linkStory-{task_id}-{story_id}.json")
+
+    def link_task_bug(self, task_id: str, bug_id: str) -> Tuple[bool, Dict]:
+        """任务关联Bug（老 API）
+
+        Args:
+            task_id: 任务ID
+            bug_id: BugID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_task_bug("10", "3")
+        """
+        return self.old_request("POST", f"/task-linkBug-{task_id}-{bug_id}.json")
+
+    def get_task_history(self, task_id: str) -> Tuple[bool, List[Dict]]:
+        """获取任务历史记录（老 API）
+
+        Args:
+            task_id: 任务ID
+
+        Returns:
+            (success, history) 历史记录列表
+
+        Example:
+            >>> success, history = client.get_task_history("10")
+            >>> for record in history:
+            ...     print(f"{record['date']}: {record['action']}")
+        """
+        success, result = self.old_request("GET", f"/task-history-{task_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("history", [])
+        return False, []
+
+    # ==================== Bug模块补充方法 ====================
+
+    def edit_bug(self, bug_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑Bug（老 API）
+
+        Args:
+            bug_id: BugID
+            **kwargs: 要修改的字段 (title, severity, pri, type, status, assignedTo, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_bug("1", title="新标题", severity="2")
+        """
+        return self.old_request("POST", f"/bug-edit-{bug_id}.json", kwargs)
+
+    def link_bug_story(self, bug_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """Bug关联需求（老 API）
+
+        Args:
+            bug_id: BugID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_bug_story("1", "5")
+        """
+        return self.old_request("POST", f"/bug-linkStory-{bug_id}-{story_id}.json")
+
+    def unlink_bug_story(self, bug_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消Bug关联需求（老 API）
+
+        Args:
+            bug_id: BugID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_bug_story("1", "5")
+        """
+        return self.old_request("GET", f"/bug-unlinkStory-{bug_id}-{story_id}.json")
+
+    def link_bug_task(self, bug_id: str, task_id: str) -> Tuple[bool, Dict]:
+        """Bug关联任务（老 API）
+
+        Args:
+            bug_id: BugID
+            task_id: 任务ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_bug_task("1", "10")
+        """
+        return self.old_request("POST", f"/bug-linkTask-{bug_id}-{task_id}.json")
+
+    def unlink_bug_task(self, bug_id: str, task_id: str) -> Tuple[bool, Dict]:
+        """取消Bug关联任务（老 API）
+
+        Args:
+            bug_id: BugID
+            task_id: 任务ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_bug_task("1", "10")
+        """
+        return self.old_request("GET", f"/bug-unlinkTask-{bug_id}-{task_id}.json")
+
+    def get_bug_statistics(
+        self, product_id: str, branch: str = "0"
+    ) -> Tuple[bool, Dict]:
+        """获取Bug统计信息（老 API）
+
+        Args:
+            product_id: 产品ID
+            branch: 分支ID，默认 "0"
+
+        Returns:
+            (success, statistics) Bug统计信息
+
+        Example:
+            >>> success, stats = client.get_bug_statistics("1")
+            >>> print(f"总Bug数: {stats['total']}, 未解决: {stats['active']}")
+        """
+        success, result = self.old_request(
+            "GET", f"/bug-statistic-{product_id}-{branch}.json"
+        )
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data
+        return False, {}
+
+    def add_bug_comment(self, bug_id: str, comment: str) -> Tuple[bool, Dict]:
+        """添加Bug评论（老 API）
+
+        Args:
+            bug_id: BugID
+            comment: 评论内容
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.add_bug_comment("1", "这是一个测试评论")
+        """
+        return self.old_request(
+            "POST", f"/bug-addComment-{bug_id}.json", {"comment": comment}
+        )
+
+    # ==================== 需求模块补充方法 ====================
+
+    def change_story(self, story_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """变更需求（老 API）
+
+        Args:
+            story_id: 需求ID
+            **kwargs: 变更参数 (title, spec, verify, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.change_story("1", title="新标题", spec="新描述")
+        """
+        return self.old_request("POST", f"/story-change-{story_id}.json", kwargs)
+
+    def review_story(
+        self, story_id: str, result: str, comment: str = ""
+    ) -> Tuple[bool, Dict]:
+        """评审需求（老 API）
+
+        Args:
+            story_id: 需求ID
+            result: 评审结果 (pass, revert, clarify, reject)
+            comment: 评审意见
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.review_story("1", "pass", "评审通过")
+        """
+        data = {"result": result}
+        if comment:
+            data["comment"] = comment
+        return self.old_request("POST", f"/story-review-{story_id}.json", data)
+
+    def get_story_tasks(
+        self, story_id: str, project_id: str = "0"
+    ) -> Tuple[bool, List[Dict]]:
+        """获取需求关联的任务（老 API）
+
+        Args:
+            story_id: 需求ID
+            project_id: 项目ID，默认 "0" 获取所有项目
+
+        Returns:
+            (success, tasks) 任务列表
+
+        Example:
+            >>> success, tasks = client.get_story_tasks("1")
+            >>> for task in tasks:
+            ...     print(f"[{task['id']}] {task['name']}")
+        """
+        success, result = self.old_request(
+            "GET", f"/story-tasks-{story_id}-{project_id}.json"
+        )
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("tasks", [])
+        return False, []
+
+    def get_story_bugs(self, story_id: str) -> Tuple[bool, List[Dict]]:
+        """获取需求关联的Bug（老 API）
+
+        Args:
+            story_id: 需求ID
+
+        Returns:
+            (success, bugs) Bug列表
+
+        Example:
+            >>> success, bugs = client.get_story_bugs("1")
+            >>> for bug in bugs:
+            ...     print(f"[{bug['id']}] {bug['title']}")
+        """
+        success, result = self.old_request("GET", f"/story-bugs-{story_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("bugs", [])
+        return False, []
+
+    def get_story_cases(self, story_id: str) -> Tuple[bool, List[Dict]]:
+        """获取需求关联的测试用例（老 API）
+
+        Args:
+            story_id: 需求ID
+
+        Returns:
+            (success, cases) 测试用例列表
+
+        Example:
+            >>> success, cases = client.get_story_cases("1")
+            >>> for case in cases:
+            ...     print(f"[{case['id']}] {case['title']}")
+        """
+        success, result = self.old_request("GET", f"/story-cases-{story_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("cases", [])
+        return False, []
+
+    def link_story_project(self, story_id: str, project_id: str) -> Tuple[bool, Dict]:
+        """需求关联项目（老 API）
+
+        Args:
+            story_id: 需求ID
+            project_id: 项目ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_story_project("1", "2")
+        """
+        return self.old_request(
+            "POST", f"/story-linkProject-{story_id}-{project_id}.json"
+        )
+
+    def unlink_story_project(self, story_id: str, project_id: str) -> Tuple[bool, Dict]:
+        """取消需求关联项目（老 API）
+
+        Args:
+            story_id: 需求ID
+            project_id: 项目ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_story_project("1", "2")
+        """
+        return self.old_request(
+            "GET", f"/story-unlinkProject-{story_id}-{project_id}.json"
+        )
+
+    # ==================== 项目模块补充方法 ====================
+
+    def edit_project(self, project_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑项目（老 API）
+
+        Args:
+            project_id: 项目ID
+            **kwargs: 要修改的字段 (name, code, begin, end, days, status, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_project("1", name="新项目名", status="doing")
+        """
+        return self.old_request("POST", f"/project-edit-{project_id}.json", kwargs)
+
+    def get_project_stories(
+        self, project_id: str, order_by: str = "id_desc"
+    ) -> Tuple[bool, List[Dict]]:
+        """获取项目需求列表（老 API）
+
+        Args:
+            project_id: 项目ID
+            order_by: 排序方式，默认 "id_desc"
+
+        Returns:
+            (success, stories) 需求列表
+
+        Example:
+            >>> success, stories = client.get_project_stories("1")
+            >>> for story in stories:
+            ...     print(f"[{story['id']}] {story['title']}")
+        """
+        success, result = self.old_request(
+            "GET", f"/project-story-{project_id}-{order_by}.json"
+        )
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("stories", [])
+        return False, []
+
+    def manage_project_members(
+        self, project_id: str, members: List[Dict]
+    ) -> Tuple[bool, Dict]:
+        """管理项目成员（老 API）
+
+        Args:
+            project_id: 项目ID
+            members: 成员列表，每个成员包含:
+                - account: 用户账号
+                - role: 角色 (如 developer, tester, pm)
+                - hours: 可用工时
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> members = [
+            ...     {"account": "user1", "role": "developer", "hours": "8"},
+            ...     {"account": "user2", "role": "tester", "hours": "8"}
+            ... ]
+            >>> success, result = client.manage_project_members("1", members)
+        """
+        data = {}
+        for i, member in enumerate(members):
+            data[f"accounts[{i}]"] = member.get("account", "")
+            data[f"roles[{i}]"] = member.get("role", "developer")
+            data[f"hours[{i}]"] = member.get("hours", "8")
+
+        return self.old_request(
+            "POST", f"/project-manageMembers-{project_id}.json", data
+        )
+
+    def link_project_story(self, project_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """项目关联需求（老 API）
+
+        Args:
+            project_id: 项目ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_project_story("1", "5")
+        """
+        return self.old_request(
+            "POST", f"/project-linkStory-{project_id}.json", {"story": story_id}
+        )
+
+    def unlink_project_story(self, project_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消项目关联需求（老 API）
+
+        Args:
+            project_id: 项目ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_project_story("1", "5")
+        """
+        return self.old_request(
+            "GET", f"/project-unlinkStory-{project_id}-{story_id}.json"
+        )
+
+    def get_project_team(self, project_id: str) -> Tuple[bool, List[Dict]]:
+        """获取项目团队成员（老 API）
+
+        Args:
+            project_id: 项目ID
+
+        Returns:
+            (success, team) 团队成员列表
+
+        Example:
+            >>> success, team = client.get_project_team("1")
+            >>> for member in team:
+            ...     print(f"{member['account']}: {member['role']}")
+        """
+        success, result = self.old_request("GET", f"/project-team-{project_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("team", [])
+        return False, []
+
+    def get_project_dynamic(
+        self, project_id: str, dynamic_type: str = "all"
+    ) -> Tuple[bool, List[Dict]]:
+        """获取项目动态（老 API）
+
+        Args:
+            project_id: 项目ID
+            dynamic_type: 动态类型 (all, today, yesterday, thisweek, lastweek, thismonth, lastmonth)
+
+        Returns:
+            (success, dynamics) 动态列表
+
+        Example:
+            >>> success, dynamics = client.get_project_dynamic("1", "today")
+            >>> for dynamic in dynamics:
+            ...     print(f"{dynamic['date']}: {dynamic['action']}")
+        """
+        success, result = self.old_request(
+            "GET", f"/project-dynamic-{project_id}-{dynamic_type}.json"
+        )
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("dynamics", [])
+        return False, []
+
+    # ==================== 测试用例模块补充方法 ====================
+
+    def edit_testcase(self, case_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑测试用例（老 API）
+
+        Args:
+            case_id: 用例ID
+            **kwargs: 要修改的字段 (title, type, pri, module, story, steps, expects, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_testcase("1", title="新标题", pri="2")
+        """
+        return self.old_request("POST", f"/testcase-edit-{case_id}.json", kwargs)
+
+    def batch_create_testcases(
+        self, product_id: str, cases: List[Dict]
+    ) -> Tuple[bool, Dict]:
+        """批量创建测试用例（老 API）
+
+        Args:
+            product_id: 产品ID
+            cases: 用例列表，每个用例包含:
+                - title: 用例标题
+                - type: 用例类型
+                - module: 模块ID
+                - story: 需求ID
+                - steps: 步骤列表
+                - expects: 预期结果列表
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> cases = [
+            ...     {"title": "测试用例1", "type": "feature"},
+            ...     {"title": "测试用例2", "type": "performance"}
+            ... ]
+            >>> success, result = client.batch_create_testcases("1", cases)
+        """
+        data = {}
+        for i, case in enumerate(cases):
+            data[f"title[{i}]"] = case.get("title", "")
+            data[f"type[{i}]"] = case.get("type", "feature")
+            if case.get("module"):
+                data[f"module[{i}]"] = case.get("module")
+            if case.get("story"):
+                data[f"story[{i}]"] = case.get("story")
+
+        return self.old_request(
+            "POST", f"/testcase-batchCreate-{product_id}.json", data
+        )
+
+    def import_testcases(self, product_id: str, file_path: str) -> Tuple[bool, Dict]:
+        """导入测试用例（老 API）
+
+        Args:
+            product_id: 产品ID
+            file_path: 导入文件路径
+
+        Returns:
+            (success, result)
+
+        Note:
+            这个方法需要上传文件，暂时返回错误信息
+
+        Example:
+            >>> success, result = client.import_testcases("1", "/path/to/import.csv")
+        """
+        # TODO: 需要实现文件上传
+        return False, {"message": "文件导入功能暂未实现"}
+
+    def export_testcases(self, product_id: str) -> Tuple[bool, Dict]:
+        """导出测试用例（老 API）
+
+        Args:
+            product_id: 产品ID
+
+        Returns:
+            (success, result) 注意：返回文件内容
+
+        Example:
+            >>> success, result = client.export_testcases("1")
+        """
+        return self.old_request("POST", f"/testcase-export-{product_id}.json")
+
+    def link_testcase_story(self, case_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """测试用例关联需求（老 API）
+
+        Args:
+            case_id: 用例ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_testcase_story("1", "5")
+        """
+        return self.old_request(
+            "POST", f"/testcase-linkStory-{case_id}-{story_id}.json"
+        )
+
+    def unlink_testcase_story(self, case_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消测试用例关联需求（老 API）
+
+        Args:
+            case_id: 用例ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_testcase_story("1", "5")
+        """
+        return self.old_request(
+            "GET", f"/testcase-unlinkStory-{case_id}-{story_id}.json"
+        )
+
+    # ==================== 发布模块补充方法 ====================
+
+    def create_release(
+        self,
+        product_id: str,
+        name: str,
+        branch: str = "0",
+        build: str = "",
+        date: str = "",
+        desc: str = "",
+    ) -> Tuple[bool, Dict]:
+        """创建发布（老 API）
+
+        Args:
+            product_id: 产品ID
+            name: 发布名称
+            branch: 分支ID，默认 "0"
+            build: 版本ID
+            date: 发布日期 (YYYY-MM-DD)
+            desc: 发布描述
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.create_release(
+            ...     product_id="1",
+            ...     name="V1.0",
+            ...     build="1",
+            ...     date="2026-04-01"
+            ... )
+        """
+        data = {
+            "product": product_id,
+            "name": name,
+            "branch": branch,
+        }
+        if build:
+            data["build"] = build
+        if date:
+            data["date"] = date
+        if desc:
+            data["desc"] = desc
+
+        return self.old_request(
+            "POST", f"/release-create-{product_id}-{branch}.json", data
+        )
+
+    def edit_release(self, release_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑发布（老 API）
+
+        Args:
+            release_id: 发布ID
+            **kwargs: 要修改的字段 (name, date, build, desc, status, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_release("1", name="V1.0.1", status="released")
+        """
+        return self.old_request("POST", f"/release-edit-{release_id}.json", kwargs)
+
+    def get_release(self, release_id: str) -> Tuple[bool, Dict]:
+        """获取发布详情（老 API）
+
+        Args:
+            release_id: 发布ID
+
+        Returns:
+            (success, release_info) 发布详情
+
+        Example:
+            >>> success, release = client.get_release("1")
+            >>> print(f"发布名: {release['name']}")
+        """
+        success, result = self.old_request("GET", f"/release-view-{release_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("release", {})
+        return False, {}
+
+    def delete_release(self, release_id: str) -> Tuple[bool, Dict]:
+        """删除发布（老 API）
+
+        Args:
+            release_id: 发布ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.delete_release("1")
+        """
+        return self.old_request("GET", f"/release-delete-{release_id}-yes.json")
+
+    def link_release_story(
+        self, release_id: str, story_ids: List[str]
+    ) -> Tuple[bool, Dict]:
+        """发布关联需求（老 API）
+
+        Args:
+            release_id: 发布ID
+            story_ids: 需求ID列表
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_release_story("1", ["5", "6", "7"])
+        """
+        data = {}
+        for i, story_id in enumerate(story_ids):
+            data[f"stories[{i}]"] = story_id
+
+        return self.old_request("POST", f"/release-linkStory-{release_id}.json", data)
+
+    def unlink_release_story(self, release_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消发布关联需求（老 API）
+
+        Args:
+            release_id: 发布ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_release_story("1", "5")
+        """
+        return self.old_request(
+            "GET", f"/release-unlinkStory-{release_id}-{story_id}.json"
+        )
+
+    def link_release_bug(
+        self, release_id: str, bug_ids: List[str], bug_type: str = "bug"
+    ) -> Tuple[bool, Dict]:
+        """发布关联Bug（老 API）
+
+        Args:
+            release_id: 发布ID
+            bug_ids: BugID列表
+            bug_type: Bug类型 (bug, leftBug)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_release_bug("1", ["10", "11"])
+        """
+        data = {}
+        for i, bug_id in enumerate(bug_ids):
+            data[f"bugs[{i}]"] = bug_id
+
+        return self.old_request(
+            "POST", f"/release-linkBug-{release_id}-all-all-bug.json", data
+        )
+
+    def unlink_release_bug(
+        self, release_id: str, bug_id: str, bug_type: str = "bug"
+    ) -> Tuple[bool, Dict]:
+        """取消发布关联Bug（老 API）
+
+        Args:
+            release_id: 发布ID
+            bug_id: BugID
+            bug_type: Bug类型 (bug, leftBug)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_release_bug("1", "10")
+        """
+        return self.old_request(
+            "GET", f"/release-unlinkBug-{release_id}-{bug_id}-{bug_type}.json"
+        )
+
+    # ==================== 版本模块补充方法 ====================
+
+    def create_build(
+        self,
+        project_id: str,
+        name: str,
+        product_id: str = "0",
+        build: str = "",
+        desc: str = "",
+    ) -> Tuple[bool, Dict]:
+        """创建版本（老 API）
+
+        Args:
+            project_id: 项目ID
+            name: 版本名称
+            product_id: 产品ID，默认 "0"
+            build: 版本号
+            desc: 版本描述
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.create_build(
+            ...     project_id="1",
+            ...     name="Sprint1 Build",
+            ...     product_id="1",
+            ...     build="1.0.0"
+            ... )
+        """
+        data = {
+            "project": project_id,
+            "name": name,
+        }
+        if product_id:
+            data["product"] = product_id
+        if build:
+            data["build"] = build
+        if desc:
+            data["desc"] = desc
+
+        return self.old_request(
+            "POST", f"/build-create-{project_id}-{product_id}.json", data
+        )
+
+    def edit_build(self, build_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑版本（老 API）
+
+        Args:
+            build_id: 版本ID
+            **kwargs: 要修改的字段 (name, build, desc, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_build("1", name="New Build Name")
+        """
+        return self.old_request("POST", f"/build-edit-{build_id}.json", kwargs)
+
+    def get_build(self, build_id: str) -> Tuple[bool, Dict]:
+        """获取版本详情（老 API）
+
+        Args:
+            build_id: 版本ID
+
+        Returns:
+            (success, build_info) 版本详情
+
+        Example:
+            >>> success, build = client.get_build("1")
+            >>> print(f"版本名: {build['name']}")
+        """
+        success, result = self.old_request("GET", f"/build-view-{build_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("build", {})
+        return False, {}
+
+    def delete_build(self, build_id: str) -> Tuple[bool, Dict]:
+        """删除版本（老 API）
+
+        Args:
+            build_id: 版本ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.delete_build("1")
+        """
+        return self.old_request("GET", f"/build-delete-{build_id}-yes.json")
+
+    def link_build_story(
+        self, build_id: str, story_ids: List[str]
+    ) -> Tuple[bool, Dict]:
+        """版本关联需求（老 API）
+
+        Args:
+            build_id: 版本ID
+            story_ids: 需求ID列表
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_build_story("1", ["5", "6"])
+        """
+        data = {}
+        for i, story_id in enumerate(story_ids):
+            data[f"stories[{i}]"] = story_id
+
+        return self.old_request("POST", f"/build-linkStory-{build_id}.json", data)
+
+    def unlink_build_story(self, build_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消版本关联需求（老 API）
+
+        Args:
+            build_id: 版本ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_build_story("1", "5")
+        """
+        return self.old_request("GET", f"/build-unlinkStory-{story_id}-yes.json")
+
+    def link_build_bug(self, build_id: str, bug_ids: List[str]) -> Tuple[bool, Dict]:
+        """版本关联Bug（老 API）
+
+        Args:
+            build_id: 版本ID
+            bug_ids: BugID列表
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_build_bug("1", ["10", "11"])
+        """
+        data = {}
+        for i, bug_id in enumerate(bug_ids):
+            data[f"bugs[{i}]"] = bug_id
+
+        return self.old_request("POST", f"/build-linkBug-{build_id}.json", data)
+
+    def unlink_build_bug(self, build_id: str, bug_id: str) -> Tuple[bool, Dict]:
+        """取消版本关联Bug（老 API）
+
+        Args:
+            build_id: 版本ID
+            bug_id: BugID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_build_bug("1", "10")
+        """
+        return self.old_request("GET", f"/build-unlinkBug-{build_id}-{bug_id}.json")
+
+    # ==================== 计划模块补充方法 ====================
+
+    def get_plan(self, plan_id: str) -> Tuple[bool, Dict]:
+        """获取计划详情（老 API）
+
+        Args:
+            plan_id: 计划ID
+
+        Returns:
+            (success, plan_info) 计划详情
+
+        Example:
+            >>> success, plan = client.get_plan("1")
+            >>> print(f"计划名: {plan['title']}")
+        """
+        success, result = self.old_request("GET", f"/productplan-view-{plan_id}.json")
+        if success and "data" in result:
+            data = json.loads(result["data"])
+            return True, data.get("plan", {})
+        return False, {}
+
+    def edit_plan(self, plan_id: str, **kwargs) -> Tuple[bool, Dict]:
+        """编辑计划（老 API）
+
+        Args:
+            plan_id: 计划ID
+            **kwargs: 要修改的字段 (title, begin, end, desc, etc.)
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.edit_plan("1", title="新计划名", begin="2026-04-01")
+        """
+        return self.old_request("POST", f"/productplan-edit-{plan_id}.json", kwargs)
+
+    def link_plan_story(self, plan_id: str, story_ids: List[str]) -> Tuple[bool, Dict]:
+        """计划关联需求（老 API）
+
+        Args:
+            plan_id: 计划ID
+            story_ids: 需求ID列表
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.link_plan_story("1", ["5", "6", "7"])
+        """
+        data = {}
+        for i, story_id in enumerate(story_ids):
+            data[f"stories[{i}]"] = story_id
+
+        return self.old_request("POST", f"/productplan-linkStory-{plan_id}.json", data)
+
+    def unlink_plan_story(self, plan_id: str, story_id: str) -> Tuple[bool, Dict]:
+        """取消计划关联需求（老 API）
+
+        Args:
+            plan_id: 计划ID
+            story_id: 需求ID
+
+        Returns:
+            (success, result)
+
+        Example:
+            >>> success, result = client.unlink_plan_story("1", "5")
+        """
+        return self.old_request(
+            "GET", f"/productplan-unlinkStory-{plan_id}-{story_id}.json"
+        )
+
 
 def read_credentials() -> Optional[Dict[str, str]]:
     """从 TOOLS.md 读取禅道凭证"""

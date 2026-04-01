@@ -1,20 +1,16 @@
-# ZenTao API SKILL
+# ZenTao API Client
 
-禅道(ZenTao)项目管理系统的 Python API 客户端，支持产品、项目、任务、Bug 全生命周期管理。
+禅道(ZenTao)项目管理系统的 Python API 客户端，支持产品、项目、任务、Bug、需求、测试、版本、发布全生命周期管理。
 
 ## 目录
 
 - [特性](#特性)
 - [支持的禅道版本](#支持的禅道版本)
 - [安装](#安装)
-- [快速开始](#快速开始)
-- [配置凭证](#配置凭证)
-- [API 参考](#api-参考)
-  - [任务管理](#任务管理)
-  - [Bug管理](#bug管理)
-  - [产品管理](#产品管理)
-  - [需求管理](#需求管理)
-  - [测试管理](#测试管理)
+- [接入方式](#接入方式)
+  - [方式一：OpenClaw 接入（推荐）](#方式一openclaw-接入推荐)
+  - [方式二：直接使用客户端](#方式二直接使用客户端)
+- [功能概览](#功能概览)
 - [状态流转](#状态流转)
 - [注意事项](#注意事项)
 - [常见问题](#常见问题)
@@ -27,9 +23,10 @@
 
 - 禅道老 API (Legacy API v1.0) 封装
 - Session 认证方式
-- 支持产品、项目、需求、任务、Bug、测试用例全流程
+- **137+ 个 API 方法**，覆盖完整开发流程
 - 返回格式统一处理（兼容 text/html 返回 JSON 的情况）
 - 丰富的类型提示和文档注释
+- 支持需求、任务、Bug、项目、测试、版本、发布、计划全流程管理
 
 ---
 
@@ -55,13 +52,6 @@
 - **新 API (v2.0)**：禅道 21.7+ 推荐使用
 - **老 API (v1.0)**：本客户端使用，21.7 仍可使用但逐步废弃
 
-### 版本查询
-
-```python
-# 查看禅道版本
-# 登录禅道后，在 管理 -> 关于 中查看版本号
-```
-
 ---
 
 ## 安装
@@ -85,9 +75,15 @@ pip install requests>=2.28.0
 
 ---
 
-## 快速开始
+## 接入方式
 
-### 1. 配置凭证
+提供两种接入方式，推荐使用 **OpenClaw 接入**。
+
+### 方式一：OpenClaw 接入（推荐）
+
+OpenClaw 是一个智能开发助手，可以自动化执行禅道工作流。
+
+#### 1. 配置凭证
 
 在项目根目录创建 `TOOLS.md` 文件：
 
@@ -99,7 +95,79 @@ pip install requests>=2.28.0
 - **密码：** your-password
 ```
 
-### 2. 使用客户端
+#### 2. 使用示例
+
+直接告诉 OpenClaw 你的需求，它会自动调用禅道 API：
+
+```
+用户：帮我创建一个用户登录功能的需求，包括前端和后端开发
+
+OpenClaw：
+✓ 已创建需求：用户登录功能开发 (ID: 123)
+✓ 已创建任务：
+  - 前端登录页面开发 (ID: 456)
+  - 后端登录接口开发 (ID: 457)
+  - 前后端联调 (ID: 458)
+```
+
+```
+用户：记录一下今天做了什么
+
+OpenClaw：
+✓ 已记录工时：
+  - 前端登录页面开发：3小时（剩余：0小时）
+  - 任务状态已更新为：done
+```
+
+```
+用户：有个bug，登录页面输入特殊字符报错
+
+OpenClaw：
+✓ 已创建Bug：登录页面输入特殊字符报错 (ID: 789)
+  - 严重程度：3
+  - 类型：代码错误
+  - 指派给：admin
+```
+
+#### 3. 支持的工作流
+
+OpenClaw 自动化支持完整的开发工作流：
+
+```
+需求管理 → 任务分解 → 任务执行 → 工时记录 → Bug管理 → 版本发布
+    ↓          ↓          ↓          ↓          ↓          ↓
+  创建需求   创建任务   开始/完成  记录工时   创建/解决  创建发布
+  评审需求   分配任务   暂停/继续  验证工时   指派Bug    关联需求
+  变更需求   移动任务   激活任务              关闭Bug    关联Bug
+```
+
+#### 4. 优势
+
+- ✅ **自然语言交互**：无需编写代码，直接描述需求
+- ✅ **自动化工作流**：自动创建需求、分解任务、记录工时
+- ✅ **智能推荐**：根据上下文推荐最佳实践
+- ✅ **完整流程追踪**：从需求到发布全程可追溯
+
+#### 5. 常用命令示例
+
+| 用户说 | OpenClaw 执行 |
+|--------|--------------|
+| "创建需求：xxx" | 创建需求 + 关联项目 |
+| "分解任务" | 自动分解需求为多个任务 |
+| "开始做xxx" | 查找任务 → 开始任务 |
+| "记录今天的工时" | 记录工时 + 更新剩余时间 |
+| "完成这个任务" | 记录最终工时 → 完成任务 |
+| "有个bug：xxx" | 创建Bug → 关联需求/任务 |
+| "bug已修复" | 解决Bug → 关闭Bug |
+| "发布版本1.0" | 创建版本 → 关联需求/Bug → 创建发布 |
+
+---
+
+### 方式二：直接使用客户端
+
+如果需要在代码中直接使用 API，可以使用 Python 客户端。
+
+#### 1. 导入客户端
 
 ```python
 from pathlib import Path
@@ -125,7 +193,7 @@ sid = client.get_session()
 print(f"登录成功，Session ID: {sid}")
 ```
 
-### 3. Session 持久化
+#### 2. Session 持久化
 
 客户端支持 Session 持久化，无需每次都登录：
 
@@ -156,258 +224,115 @@ client.clear_session()
 └── ...
 ```
 
-**配置选项**：
-```python
-client = ZenTaoClient(
-    endpoint,
-    username,
-    password,
-    session_dir=None,     # Session 存储目录，默认 .zentao/sessions（项目根目录）
-    auto_save=True,       # 登录后自动保存
-    auto_load=True,       # 启动时自动加载
-)
-```
-
----
-
-## 配置凭证
-
-凭证配置支持两种方式：
-
-### 方式一：TOOLS.md 文件
-
-在项目根目录创建 `TOOLS.md`：
-
-```markdown
-## 禅道 API
-
-- **API 地址：** http://192.168.1.100/zentao/
-- **用户名：** admin
-- **密码：** your-password
-```
-
-### 方式二：环境变量
-
-```python
-import os
-os.environ['ZENTAO_ENDPOINT'] = 'http://192.168.1.100/zentao/'
-os.environ['ZENTAO_USERNAME'] = 'admin'
-os.environ['ZENTAO_PASSWORD'] = 'your-password'
-```
-
----
-
-## API 参考
-
-### 认证
-
-```python
-# 获取会话
-sid = client.get_session()
-if not sid:
-    print("认证失败")
-```
-
-### 任务管理
-
-```python
-# 创建任务
-client.create_task(
-    project="1",
-    name="用户登录功能开发",
-    type="devel",
-    story="5",
-    assignedTo="admin",
-    pri="3",
-    estimate="8",
-    desc="实现用户登录功能"
-)
-
-# 批量创建任务
-client.create_tasks(
-    project="1",
-    tasks=[
-        {"name": "前端开发", "type": "devel", "assignedTo": "dev1", "estimate": "8"},
-        {"name": "后端开发", "type": "devel", "assignedTo": "dev2", "estimate": "16"},
-        {"name": "测试", "type": "test", "assignedTo": "qa1", "estimate": "4"}
-    ]
-)
-
-# 查看我的任务
-success, tasks = client.get_my_tasks("assignedTo")
-
-# 查看任务详情
-success, task = client.get_task_detail(task_id)
-print(f"状态: {task['status']}")  # wait, doing, pause, done, cancel, closed
-
-# 开始任务
-client.start_task(task_id, "开始开发")
-
-# 记录工时（批量）
-from datetime import datetime
-today = datetime.now().strftime("%Y-%m-%d")
-client.record_estimate(task_id, [
-    {"date": today, "consumed": "3", "left": "5", "work": "完成开发"}
-])
-
-# 完成任务（先记录工时 left=0）
-client.record_estimate(task_id, [
-    {"date": today, "consumed": "8", "left": "0", "work": "全部完成"}
-])
-client.finish_task(task_id, "开发完成")
-
-# 暂停/继续任务
-client.pause_task(task_id, "等待依赖")
-client.restart_task(task_id, "继续开发")
-
-# 创建子任务
-client.create_subtasks(
-    execution_id="1",
-    parent_id="100",
-    tasks=[
-        {"name": "前端开发", "estimate": "8", "assignedTo": "dev1"},
-        {"name": "后端开发", "estimate": "16", "assignedTo": "dev2"}
-    ]
-)
-```
-
-### Bug管理
-
-```python
-# 查看我的 Bug
-success, bugs = client.get_my_bugs("assignedTo")
-
-# 查看 Bug 详情
-success, bug = client.get_bug(bug_id)
-
-# 创建 Bug
-client.create_bug(
-    product_id="1",
-    title="登录页面报错",
-    severity="3",
-    pri="3",
-    type="codeerror",
-    steps="1.打开登录页\n2.输入账号\n3.点击登录\n4.出现500错误",
-    assignedTo="dev1"
-)
-
-# 解决 Bug
-client.resolve_bug(bug_id, "fixed", "trunk", "已修复")
-
-# 关闭 Bug
-client.close_bug(bug_id, "验证通过")
-
-# 激活 Bug
-client.activate_bug(bug_id, "问题重现")
-
-# 从测试用例创建 Bug
-client.create_bug_from_testcase(
-    case_id="8",
-    title="登录功能测试发现Bug",
-    severity="3",
-    pri="3",
-    assignedTo="admin"
-)
-
-# 或使用 create_bug + case_id 参数
-client.create_bug(
-    product_id="1",
-    title="测试发现Bug",
-    case_id="8",  # 关联测试用例
-    severity="3",
-    pri="3",
-    steps="重现步骤",
-    assignedTo="admin"
-)
-```
-
-### 产品管理
-
-```python
-# 查询产品列表
-success, products = client.get_products()
-
-# 创建产品
-client.create_product(
-    name="新产品",
-    code="NEW",
-    po="admin",
-    status="normal"
-)
-```
-
-### 需求管理
+#### 3. 快速示例
 
 ```python
 # 创建需求
 client.create_story(
     product_id="1",
     title="用户登录功能",
-    pri="3",
-    estimate="8",
-    spec="实现用户登录功能"
+    execution_id="1",
+    pri="3"
 )
 
-# 查看我的需求
-success, stories = client.get_my_stories("assignedTo")
+# 批量创建任务
+client.create_tasks(
+    project="1",
+    tasks=[
+        {"name": "前端开发", "type": "devel", "assignedTo": "admin", "estimate": "8"},
+        {"name": "后端开发", "type": "devel", "assignedTo": "admin", "estimate": "16"},
+        {"name": "测试", "type": "test", "assignedTo": "qa", "estimate": "4"}
+    ]
+)
 
-# 编辑需求
-client.edit_story(story_id, title="新标题", pri="2")
+# 开始任务
+client.start_task(task_id, "开始开发")
 
-# 关闭需求
-client.close_story(story_id)
+# 记录工时
+from datetime import datetime
+today = datetime.now().strftime("%Y-%m-%d")
+client.record_estimate(task_id, [
+    {"date": today, "consumed": "8", "left": "0", "work": "完成开发"}
+])
+
+# 完成任务
+client.finish_task(task_id, "开发完成")
+
+# 创建Bug
+client.create_bug(
+    product_id="1",
+    title="登录页面报错",
+    severity="3",
+    pri="3",
+    assignedTo="admin"
+)
+
+# 解决Bug
+client.resolve_bug(bug_id, "fixed", "trunk", "已修复")
+
+# 关闭Bug
+client.close_bug(bug_id, "验证通过")
 ```
 
-### 测试管理
+---
 
-```python
-# 创建测试用例（字符串格式）
-client.create_testcase(
-    product_id="1",
-    title="登录功能测试",
-    case_type="feature",
-    pri="3",
-    steps="1.打开登录页\n2.输入账号密码\n3.点击登录",
-    expect="登录成功"
-)
+## 功能概览
 
-# 创建测试用例（列表格式 - 精确控制步骤和预期结果）
-client.create_testcase(
-    product_id="1",
-    title="注册功能测试",
-    case_type="feature",
-    pri="2",
-    steps_list=["打开注册页面", "填写用户信息", "点击注册按钮", "验证注册成功"],
-    expects_list=["显示注册表单", "信息填写成功", "提交成功", "跳转到首页"]
-)
+ZenTaoClient 提供 **137+ 个 API 方法**，覆盖完整的开发工作流：
 
-# 创建测试任务
-client.create_testtask(
-    product_id="1",
-    name="Sprint1测试",
-    begin="2026-03-20",
-    end="2026-03-25"
-)
+### 核心模块
 
-# 查询测试用例
-success, cases = client.get_testcases(product_id)
-for case in cases:
-    print(f"[{case['id']}] {case['title']} - {case['type']}")
+| 模块 | 方法数 | 主要功能 |
+|-----|-------|---------|
+| **任务管理** | 26个 | 创建、编辑、状态流转、工时记录、移动、复制、关联 |
+| **Bug管理** | 18个 | 创建、编辑、状态流转、关联需求/任务、统计、评论 |
+| **需求管理** | 13个 | 创建、编辑、变更、评审、关联项目/任务/Bug/用例 |
+| **项目管理** | 13个 | 创建、编辑、成员管理、需求关联、团队、动态查询 |
+| **测试管理** | 23个 | 测试用例、测试套件、测试任务、测试报告的CRUD操作 |
+| **发布管理** | 9个 | 创建、编辑、关联需求/Bug |
+| **版本管理** | 8个 | 创建、编辑、关联需求/Bug |
+| **计划管理** | 7个 | 创建、编辑、关联需求 |
+| **产品管理** | 7个 | 创建、编辑、查询 |
 
-# 删除测试用例（软删除）
-success, result = client.delete_testcase("10", confirm="yes")
+### 完整生命周期管理
 
-# 验证删除
-success, case = client.get_testcase("10")
-if case.get('deleted') == '1':
-    print("测试用例已删除")
+✅ **需求管理**
+- 创建、编辑、变更、评审需求
+- 需求关联项目、任务、Bug、测试用例
+- 需求状态查询和统计
 
-# 获取测试用例详情
-success, case_detail = client.get_testcase(case_id)
-print(f"标题: {case_detail['title']}")
-print(f"类型: {case_detail['type']}")
-print(f"优先级: {case_detail['pri']}")
-```
+✅ **任务管理**
+- 创建任务、批量创建、创建子任务
+- 任务状态流转：wait → doing → done → closed
+- 任务移动、复制、指派
+- 工时记录和管理
+
+✅ **Bug管理**
+- 创建Bug、从测试用例创建Bug
+- Bug状态流转：active → resolved → closed
+- Bug关联需求、任务
+- Bug统计和评论
+
+✅ **项目协作**
+- 项目创建、编辑、启动、关闭
+- 项目成员管理
+- 项目需求关联
+- 项目团队和动态查询
+
+✅ **测试管理**
+- 测试用例创建、编辑、批量创建
+- 测试套件管理
+- 测试任务创建和状态管理
+- 测试报告
+
+✅ **版本发布**
+- 版本创建和管理
+- 发布创建和管理
+- 需求和Bug关联
+
+详细 API 文档请参考：
+- **新增接口清单**：`new_apis_added.md`
+- **缺失接口清单**：`missing_apis.md`
 
 ---
 
@@ -435,6 +360,14 @@ active ──解决──→ resolved ──关闭──→ closed
   ↑                │
   │                │
   └──激活──────────┘
+```
+
+### 需求状态流转
+
+```
+draft ──评审──→ active ──开发──→ developed ──测试──→ testing ──发布──→ released
+  │              │                │               │              │
+  └──关闭────────┴────────────────┴───────────────┴──────────────┘
 ```
 
 ---
@@ -473,13 +406,17 @@ ok, task = client.get_task_detail(task_id)
 print(task['status'])  # 验证是否为 'doing'
 ```
 
-### 4. 解决 Bug 用专用接口
+### 4. 统一的返回格式
+
+所有 API 方法都返回 `(success, result)` 元组：
 
 ```python
-# ✅ 正确
-client.resolve_bug(bug_id, "fixed", "trunk", "已修复")
+success, result = client.create_task(...)
 
-# ❌ 错误：不要用 edit_bug 修改状态
+if success:
+    print(f"操作成功: {result}")
+else:
+    print(f"操作失败: {result}")
 ```
 
 ---
@@ -515,20 +452,20 @@ from datetime import datetime
 today = datetime.now().strftime("%Y-%m-%d")
 ```
 
-### Q: 创建子任务失败？
+### Q: 如何查看所有支持的 API？
 
-确保参数完整：
 ```python
-tasks = [
-    {
-        "name": "前端开发",      # 必需
-        "estimate": "8",         # 必需
-        "assignedTo": "admin",   # 必需
-        "type": "devel",         # 可选，默认devel
-        "pri": "3"              # 可选，默认3
-    }
-]
+# 查看客户端所有方法
+import inspect
+for name, method in inspect.getmembers(client, predicate=inspect.ismethod):
+    if not name.startswith('_'):
+        print(name)
 ```
+
+或参考以下文档：
+- `new_apis_added.md` - 新增接口清单
+- `missing_apis.md` - 缺失接口清单
+- `SKILL.md` - OpenClaw 使用指南
 
 ---
 
@@ -537,14 +474,17 @@ tasks = [
 ```
 zentao-api/
 ├── lib/
-│   └── zentao_client.py    # 核心客户端
+│   └── zentao_client.py       # 核心客户端（137+ API方法）
 ├── docs/
-│   └── 测试报告-工单客服系统.md
-├── scripts/                  # 辅助脚本
-├── SKILL.md                 # AI助手指南
-├── README.md                # 本文件
-├── package.json             # npm包配置
-└── requirements.txt         # Python依赖
+│   └── *.md                    # 禅道 API 文档
+├── scripts/                    # 辅助脚本
+├── new_apis_added.md           # 新增接口清单
+├── missing_apis.md             # 缺失接口清单
+├── SKILL_UPDATE_SUMMARY.md     # SKILL 更新总结
+├── SKILL.md                    # OpenClaw 使用指南
+├── README.md                   # 本文件
+├── package.json                # npm包配置
+└── requirements.txt            # Python依赖
 ```
 
 ---
